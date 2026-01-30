@@ -1,50 +1,54 @@
-### 2. prompts.md
+# 🤖 Project Workflow: Human Core + AI Assist
 
-This file documents the logical steps (or "prompts") one would use to build this application iteratively. This is great for documenting your thought process or for anyone trying to recreate the project using AI assistance.
+**Development Split:**
+* **70% Human:** Project structure, HTML skeleton, CSS styling, and core DOM manipulation logic.
+* **30% AI:** Advanced asynchronous patterns (`Promise.all`), API error handling refinement, and specific algorithm implementation for "Battle Mode."
 
-```markdown
-# 🤖 Project Prompts & Development Steps
+This document records the specific prompts used to bridge the gap between the basic implementation and the final Level 3 features.
 
-This document outlines the prompt engineering strategy used to build "Dev-Detective," broken down by the difficulty levels assigned in the mission.
+---
 
-## Phase 1: The Skeleton & Search (Level 1)
+## 1. Refining the Data (Level 2)
+*Context: I had the basic API fetch working and displaying raw JSON data, but the dates were unreadable and I needed to sort repositories.*
 
-**Goal:** Establish the UI structure and basic API fetching.
+**Prompt:**
+> "I have a JavaScript function fetching GitHub user data. The date comes back as `2023-01-25T12:00:00Z`, which looks bad on the UI.
+>
+> 1. Write a small helper function to convert this ISO string into a format like '25 Jan 2023'.
+> 2. Also, how do I modify my fetch URL to get the user's repositories sorted by the 'latest update' instead of the default order?"
 
-> **Prompt:** > "Create a vanilla JavaScript application called 'Dev-Detective'. 
-> 1. **HTML:** Create a search bar and a main profile card container.
-> 2. **CSS:** Style it with a dark 'developer' theme (dark blues, white text).
-> 3. **JS:** Write a function that takes a username input, fetches data from `https://api.github.com/users/{username}`, and displays the Avatar, Name, Bio, and Join Date.
-> 4. **Requirements:** Handle 404 errors (User not found) effectively."
+---
 
-## Phase 2: Enhanced Data & Formatting (Level 2)
+## 2. Implementing "Battle Mode" (Level 3)
+*Context: I built the UI for the 'Battle' tab and the input forms, but I wasn't sure how to handle two API requests efficiently at the exact same time.*
 
-**Goal:** Add repository data and fix formatting issues.
+**Prompt:**
+> "I am building a 'Battle Mode' where two users are compared. I currently have a function `getUserData(username)`.
+>
+> I need to run this function for two different users simultaneously when the 'Fight' button is clicked.
+>
+> Please show me how to use `Promise.all` to fetch both users at once. If *either* user doesn't exist, the whole operation should fail and show an error."
 
-> **Prompt:**
-> "Refine the existing code with these additions:
-> 1. **Date Formatting:** The API returns dates like `2023-01-25T...`. Create a helper function to convert this to `25 Jan 2023`.
-> 2. **Repositories:** After fetching the user, make a *second* API call to `repos_url`. Sort them by 'recently updated' and display the top 5 links below the profile bio.
-> 3. **Links:** Ensure the website link and repository names are clickable and open in new tabs."
+---
 
-## Phase 3: "Battle Mode" Architecture (Level 3)
+## 3. Winner Logic & Dynamic Styling
+*Context: I had the data for both users, but needed a clean logic to determine the winner and apply the green/red classes I wrote in my CSS.*
 
-**Goal:** Implement the complex comparison logic and UI toggling.
+**Prompt:**
+> "I have two user objects, `user1` and `user2`, returned from the API.
+>
+> Write a logic block to compare them based on `followers`.
+> - If User 1 has more followers, add the CSS class `.winner` to their card and `.loser` to User 2.
+> - Handle the reverse case.
+> - Return the HTML string for both cards so I can inject it into my container."
 
-> **Prompt:**
-> "Add a 'Battle Mode' to the application:
-> 1. **UI:** Add a toggle switch in the header to swap between 'Search Mode' and 'Battle Mode'.
-> 2. **Battle Logic:** In Battle Mode, show two input fields. When 'FIGHT' is clicked, fetch *both* users simultaneously.
-> 3. **Performance:** Use `Promise.all` to ensure both requests happen in parallel.
-> 4. **Comparison:** Compare their `followers` count. Give the winner a Green border/badge and the loser a Red border with lower opacity.
-> 5. **Error Handling:** If either user doesn't exist, fail the whole battle gracefully."
+---
 
-## Phase 4: Refinement & Optimization
+## 4. Debugging & Cleanup
+*Context: The app was working, but if I searched for a user that didn't exist, the console threw an uncaught error.*
 
-**Goal:** Clean up code and ensure responsiveness.
-
-> **Prompt:**
-> "Review the code:
-> 1. Ensure the CSS is responsive (cards should stack on mobile).
-> 2. Add a loading spinner that appears during fetch requests and disappears afterwards.
+**Prompt:**
+> "My `async/await` function crashes the app when the GitHub API returns a 404 error.
+>
+> Wrap this existing fetch code in a `try...catch` block so that it updates the UI with a 'User Not Found' message instead of freezing the page." spinner that appears during fetch requests and disappears afterwards.
 > 3. Consolidate CSS into a single `<style>` block and JS into a `<script>` block for a single-file solution."
