@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev-Detective: Level 3</title>
+    <style>
+        :root {
+            --bg-color: #141d2f;
+            --card-bg: #1e2a47;
+            --text-main: #ffffff;
+            --text-secondary: #90a4d4;
+            --accent: #0079ff;
+            --error: #f74646;
+            --success: #00ff7f; /* Green for Winner */
+            --failure: #ff4d4d; /* Red for Loser */
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace; /* Dev theme */
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* --- Header & Toggle --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: 1px solid var(--text-secondary);
+            color: var(--text-secondary);
+            padding: 5px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .toggle-btn:hover, .toggle-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* --- Search Bar --- */
+        .search-container {
+            background-color: var(--card-bg);
+            padding: 10px;
+            border-radius: 15px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5);
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 16px;
+            padding: 10px;
+            outline: none;
+        }
+
+        input::placeholder { color: var(--text-secondary); }
+
+        button.search-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button.search-btn:hover { background-color: #005ecb; }
+
+        /* --- Mode Logic --- */
+        .mode-section { display: none; }
+        .mode-section.active { display: block; }
+        
+        .battle-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* --- Profile Card --- */
+        .profile-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .avatar {
+            width: 117px;
+            height: 117px;
+            border-radius: 50%;
+        }
+
+        .profile-info { flex: 1; }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+        .name { font-size: 26px; font-weight: bold; margin: 0; }
+        .joined { color: var(--text-secondary); font-size: 14px; }
+        .username { color: var(--accent); margin-top: 5px; display: block; }
+        
+        .bio { color: var(--text-secondary); margin: 20px 0; line-height: 1.5; }
+
+        /* --- Repos List (Level 2) --- */
+        .repo-list {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .repo-item {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .repo-item a { color: var(--text-main); text-decoration: none; font-weight: bold; }
+        .repo-item a:hover { text-decoration: underline; }
+
+        /* --- Battle Mode Specifics (Level 3) --- */
+        .battle-arena {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .battle-arena .profile-card {
+            flex: 1;
+            flex-direction: column; /* Stack items for narrower cards */
+            text-align: center;
+            min-width: 250px;
+        }
+        
+        .battle-arena .avatar { margin: 0 auto; }
+        .battle-arena .profile-header { flex-direction: column; align-items: center; }
+
+        /* Battle Results */
+        .winner { border: 2px solid var(--success); position: relative; }
+        .winner::after {
+            content: "🏆 WINNER";
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: var(--success);
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .loser { border: 2px solid var(--failure); opacity: 0.7; }
+
+        .error-msg { color: var(--error); font-weight: bold; margin-top: 10px; display: none; }
+        .loader { text-align: center; margin-top: 20px; display: none; font-size: 18px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .profile-card { flex-direction: column; text-align: center; }
+            .profile-header { flex-direction: column; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>devfinder</h1>
+        <div>
+            <button class="toggle-btn active" id="btn-search-mode">Search</button>
+            <button class="toggle-btn" id="btn-battle-mode">Battle</button>
+        </div>
+    </header>
+
+    <div id="search-mode" class="mode-section active">
+        <form class="search-container" id="search-form">
+            <input type="text" id="search-input" placeholder="Search GitHub username..." required>
+            <button type="submit" class="search-btn">Search</button>
+        </form>
+        <p class="error-msg" id="search-error">User not found!</p>
+        <div id="search-result"></div>
+    </div>
+
+    <div id="battle-mode" class="mode-section">
+        <form class="search-container battle-inputs" id="battle-form">
+            <input type="text" id="player-1" placeholder="Player 1" required>
+            <input type="text" id="player-2" placeholder="Player 2" required>
+            <button type="submit" class="search-btn">FIGHT</button>
+        </form>
+        <p class="error-msg" id="battle-error">One or both users not found!</p>
+        <div id="battle-result" class="battle-arena"></div>
+    </div>
+
+    <div class="loader" id="loader">Loading...</div>
+</div>
+
+<script>
+    // --- Configuration ---
+    const API_URL = "https://api.github.com/users/";
+
+    // --- DOM Elements ---
+    const searchModeBtn = document.getElementById('btn-search-mode');
+    const battleModeBtn = document.getElementById('btn-battle-mode');
+    const searchSection = document.getElementById('search-mode');
+    const battleSection = document.getElementById('battle-mode');
+    
+    const searchForm = document.getElementById('search-form');
+    const battleForm = document.getElementById('battle-form');
+    
+    const searchResult = document.getElementById('search-result');
+    const battleResult = document.getElementById('battle-result');
+    
+    const loader = document.getElementById('loader');
+    const searchError = document.getElementById('search-error');
+    const battleError = document.getElementById('battle-error');
+
+    // --- Mode Switching ---
+    searchModeBtn.addEventListener('click', () => switchMode('search'));
+    battleModeBtn.addEventListener('click', () => switchMode('battle'));
+
+    function switchMode(mode) {
+        if (mode === 'search') {
+            searchSection.classList.add('active');
+            battleSection.classList.remove('active');
+            searchModeBtn.classList.add('active');
+            battleModeBtn.classList.remove('active');
+        } else {
+            searchSection.classList.remove('active');
+            battleSection.classList.add('active');
+            searchModeBtn.classList.remove('active');
+            battleModeBtn.classList.add('active');
+        }
+        // Clear previous results
+        searchResult.innerHTML = '';
+        battleResult.innerHTML = '';
+        hideErrors();
+    }
+
+    // --- Helper Functions ---
+    function showLoader() { loader.style.display = 'block'; }
+    function hideLoader() { loader.style.display = 'none'; }
+    function hideErrors() {
+        searchError.style.display = 'none';
+        battleError.style.display = 'none';
+    }
+    
+    // Format Date: 2023-01-25T12:00:00Z -> 25 Jan 2023
+    function formatDate(isoDate) {
+        const date = new Date(isoDate);
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    // --- CORE LOGIC: Fetch Data ---
+    async function getUserData(username) {
+        const response = await fetch(API_URL + username);
+        if (!response.ok) throw new Error('User not found');
+        const data = await response.json();
+        return data;
+    }
+
+    async function getRepos(username) {
+        // Fetch repos sorted by updated desc, limited to 5
+        const response = await fetch(`${API_URL}${username}/repos?sort=updated&per_page=5`);
+        if (!response.ok) return [];
+        return await response.json();
+    }
+
+    // --- LEVEL 1 & 2: Search Mode Logic ---
+    searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('search-input').value;
+        
+        hideErrors();
+        searchResult.innerHTML = '';
+        showLoader();
+
+        try {
+            const user = await getUserData(username);
+            const repos = await getRepos(username);
+            
+            // Render Profile
+            searchResult.innerHTML = generateProfileHTML(user, repos);
+        } catch (err) {
+            searchError.style.display = 'block';
+        } finally {
+            hideLoader();
+        }
+    });
+
+    // --- LEVEL 3: Battle Mode Logic ---
+    battleForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user1Name = document.getElementById('player-1').value;
+        const user2Name = document.getElementById('player-2').value;
+
+        hideErrors();
+        battleResult.innerHTML = '';
+        showLoader();
+
+        try {
+            // Run both fetches simultaneously for performance
+            const [user1, user2] = await Promise.all([
+                getUserData(user1Name),
+                getUserData(user2Name)
+            ]);
+
+            // Determine Winner based on Followers
+            let p1Class = '';
+            let p2Class = '';
+
+            if (user1.followers > user2.followers) {
+                p1Class = 'winner';
+                p2Class = 'loser';
+            } else if (user2.followers > user1.followers) {
+                p1Class = 'loser';
+                p2Class = 'winner';
+            }
+
+            // Render both cards side by side
+            // Note: passing empty array [] for repos to keep battle cards cleaner
+            battleResult.innerHTML = `
+                <div class="${p1Class}">${generateProfileHTML(user1, [], true)}</div>
+                <div class="${p2Class}">${generateProfileHTML(user2, [], true)}</div>
+            `;
+
+        } catch (err) {
+            battleError.style.display = 'block';
+        } finally {
+            hideLoader();
+        }
+    });
+
+    // --- HTML Generator ---
+    function generateProfileHTML(user, repos = [], isCompact = false) {
+        // Handle null values
+        const bio = user.bio ? user.bio : "This profile has no bio";
+        const portfolio = user.blog ? `<a href="${user.blog.startsWith('http') ? user.blog : 'http://' + user.blog}" target="_blank" style="color:var(--accent)">Website</a>` : "No Website";
+        
+        let repoHTML = '';
+        if (repos.length > 0) {
+            repoHTML = `<div class="repo-list"><h3>Latest Repos</h3>` + 
+                repos.map(repo => `
+                    <div class="repo-item">
+                        <a href="${repo.html_url}" target="_blank">${repo.name}</a>
+                    </div>
+                `).join('') + `</div>`;
+        }
+
+        return `
+            <div class="profile-card" style="${isCompact ? 'margin-top:0; box-shadow:none;' : ''}">
+                <img src="${user.avatar_url}" alt="Avatar" class="avatar">
+                <div class="profile-info">
+                    <div class="profile-header">
+                        <div>
+                            <h2 class="name">${user.name || user.login}</h2>
+                            <span class="username">@${user.login}</span>
+                        </div>
+                        <p class="joined">Joined ${formatDate(user.created_at)}</p>
+                    </div>
+                    <p class="bio">${bio}</p>
+                    
+                    <div style="display:flex; justify-content:space-between; background:var(--bg-color); padding:15px; border-radius:10px;">
+                        <div style="text-align:center">
+                            <span style="display:block; font-size:12px; color:var(--text-secondary)">Repos</span>
+                            <span style="font-weight:bold; font-size:18px;">${user.public_repos}</span>
+                        </div>
+                        <div style="text-align:center">
+                            <span style="display:block; font-size:12px; color:var(--text-secondary)">Followers</span>
+                            <span style="font-weight:bold; font-size:18px;">${user.followers}</span>
+                        </div>
+                        <div style="text-align:center">
+                            <span style="display:block; font-size:12px; color:var(--text-secondary)">Following</span>
+                            <span style="font-weight:bold; font-size:18px;">${user.following}</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        ${portfolio}
+                    </div>
+
+                    ${repoHTML}
+                </div>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
