@@ -1,4 +1,4 @@
-# 🤖 Project Workflow: Human Core + AI Assist
+#  Project Workflow: Human Core + AI Assist
 
 **Development Split:**
 * **70% Human:** Project structure, HTML skeleton, CSS styling, and core DOM manipulation logic.
@@ -6,7 +6,6 @@
 
 This document records the specific prompts used to bridge the gap between the basic implementation and the final Level 3 features.
 
----
 
 ## 1. Refining the Data (Level 2)
 *Context: I had the basic API fetch working and displaying raw JSON data, but the dates were unreadable and I needed to sort repositories.*
@@ -17,7 +16,6 @@ This document records the specific prompts used to bridge the gap between the ba
 > 1. Write a small helper function to convert this ISO string into a format like '25 Jan 2023'.
 > 2. Also, how do I modify my fetch URL to get the user's repositories sorted by the 'latest update' instead of the default order?"
 
----
 
 ## 2. Implementing "Battle Mode" (Level 3)
 *Context: I built the UI for the 'Battle' tab and the input forms, but I wasn't sure how to handle two API requests efficiently at the exact same time.*
@@ -29,7 +27,6 @@ This document records the specific prompts used to bridge the gap between the ba
 >
 > Please show me how to use `Promise.all` to fetch both users at once. If *either* user doesn't exist, the whole operation should fail and show an error."
 
----
 
 ## 3. Winner Logic & Dynamic Styling
 *Context: I had the data for both users, but needed a clean logic to determine the winner and apply the green/red classes I wrote in my CSS.*
@@ -42,7 +39,6 @@ This document records the specific prompts used to bridge the gap between the ba
 > - Handle the reverse case.
 > - Return the HTML string for both cards so I can inject it into my container."
 
----
 
 ## 4. Debugging & Cleanup
 *Context: The app was working, but if I searched for a user that didn't exist, the console threw an uncaught error.*
