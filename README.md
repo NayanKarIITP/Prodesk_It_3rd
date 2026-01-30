@@ -1,8 +1,9 @@
-# 🕵️ Dev-Detective
+#  Dev-Detective
+# Live URL: https://prodesk-it-3rd.vercel.app/
 
 **Dev-Detective** is a GitHub user search application that utilizes the GitHub API to fetch and display developer profiles in real-time. It features a robust search functionality and a "Battle Mode" to compare two developers head-to-head.
 
-## 🚀 Features
+##  Features
 
 This project was built in three difficulty levels, culminating in a full-featured application:
 
@@ -21,7 +22,7 @@ This project was built in three difficulty levels, culminating in a full-feature
 - **Parallel Fetching:** Uses `Promise.all()` to fetch data for both users concurrently for optimal performance.
 - **Winner/Loser Logic:** Compares users based on **Follower Count** and visually highlights the winner (Green) and loser (Red).
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **HTML5:** Semantic structure.
 - **CSS3:** Custom "Dev-Theme" styling with CSS Variables (Dark Mode).
